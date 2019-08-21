@@ -1,0 +1,330 @@
+//https://docs.google.com/document/d/1HL56CahQfOn3Hylr-Kb04XWjsM0y6clPk58CV7uQTOY/edit?usp=sharing
+
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
+public class Word {
+    String word_target, word_explain;
+
+    public Word() {
+        this.word_target = "";
+        this.word_explain = "";
+    }
+
+    public Word(String word_target, String word_explain) {
+        this.word_target = word_target;
+        this.word_explain = word_explain;
+    }
+
+    // GETTER & SETTER
+    public String getWord_target() {
+        return word_target;
+    }
+
+    public void setWord_target(String word_target) {
+        this.word_target = word_target;
+    }
+
+    public String getWord_explain() {
+        return word_explain;
+    }
+
+    public void setWord_explain(String word_explain) {
+        this.word_explain = word_explain;
+    }
+}
+
+public class Dictionary {
+    public ArrayList<Word> dict;
+
+    public Dictionary() {
+        dict = new ArrayList<Word>();
+    }
+
+    /**
+     * printithWord la ham in tu thu i trong tu dien dict
+     *
+     * @param i int la thu tu cua tu duoc in
+     */
+    public void printithWord(int i) {
+        System.out.println((i + 1) + "\t|" +
+                dict.get(i).getWord_target() + "\t|" +
+                dict.get(i).getWord_explain()
+        );
+    }
+
+    /**
+     * addWord la ham them mot obj Word vao dict
+     *
+     * @param w la obj duoc them
+     */
+    public void addWord(Word w) {
+        dict.add(w);
+    }
+
+    /**
+     * getSize la ham tra ve so tu co trong tu dien
+     *
+     * @return do dai tu dien
+     */
+    public int getSize() {
+        return dict.size();
+    }
+
+    /**
+     * findWord la ham tim thu tu cua tu tieng anh trong tu dien
+     *
+     * @param englishWord la tu can tim thu tu
+     * @return thu tu cua tu
+     */
+    public int findWord(String englishWord) {
+        for (int i = 0; i < dict.size(); i++) {
+            if (englishWord.equals(dict.get(i).getWord_target())) {
+                return i;
+            }
+        }
+        return -1; // Khong tim thay tu
+    }
+
+    public Word getWord(int i) {
+        return dict.get(i);
+    }
+
+    public void removeWord(int i) {
+        Word tmp = new Word();
+        tmp = dict.remove(i);
+    }
+
+    public void changeMeaning(int i, String explain) {
+        dict.get(i).setWord_explain(explain);
+    }
+}
+
+
+
+public class DictionaryManagement {
+    /**
+     * insertFromCommandline la ham nhap du lieu tu dien vao tu ban phim
+     *
+     * @param d tu dien can nhap du lieu
+     */
+    public static void insertFromCommandline(Dictionary d) {
+        Scanner input = new Scanner(System.in);
+        System.out.print("How many words do you want to translate? ");
+        int n = input.nextInt();
+        String temp = input.nextLine(); // bien tam dua con tro xuong dong
+
+        String en, vi; // bien tam luu tru thong tin cua 1 tu
+        for (int i = 0; i < n; i++) {
+            System.out.print("Input your English word? ");
+            en = input.nextLine();
+            System.out.print("...then translate it in VNM? ");
+            vi = input.nextLine();
+            Word newWord = new Word(en, vi); // Tao obj Word voi du lieu duoc dua vao
+            d.addWord(newWord); // Them obj vua tao vao tu dien
+        }
+        input.close();
+    }
+
+    /**
+     * insertFromFile la ham nhap du lieu tu dien vao tu file "dictionary.txt"
+     *
+     * @param d la tu dien can nhap du lieu
+     */
+    public static void insertFromFile(Dictionary d) {
+        Scanner inFile = null;
+        try {
+            inFile = new Scanner(new File("dictionary.txt")); // tao Scanner doc tu file duoc mo
+            System.out.println("File has been opened.");
+            while (inFile.hasNext()) {
+                String curLine = inFile.nextLine(); // Doc vao mot dong trong file
+                String[] splitted = curLine.split("\t"); // Chia dong vua doc thanh cac String, duoc ngan cach boi dau tab
+                String en = splitted[0].trim(); // tu tieng anh dat truoc dau tab
+                String vi = splitted[1].trim(); // tu tieng viet dat sau dau tab
+                Word newWord = new Word(en, vi); // Tao obj Word voi du lieu duoc dua vao
+                d.addWord(newWord); // Them obj vua tao vao tu dien
+            }
+            System.out.println("Dictionary loaded succesfull!");
+        } catch (FileNotFoundException e) {
+            System.err.printf("Error: cannot open file %s");
+        }
+        inFile.close();
+    }
+
+    /**
+     * dictionaryLookup la ham in ra thong tin ve viec tim kiem mot tu trong tu dien
+     *
+     * @param d           tu dien duoc su dung
+     * @param englishWord tu can tim
+     */
+    public static void dictionaryLookup(Dictionary d, String englishWord) {
+        int i = d.findWord(englishWord); // ham tra ve vi tri cua tu can tim
+        if (i < 0) {
+            System.out.println("Word <" + englishWord + "> cannot be found in the dictionary");
+        } else {
+            Word tmp = d.getWord(i);
+            System.out.println("Word <" + englishWord + "> is found at index " + (i + 1) + ", means: " + tmp.getWord_explain());
+        }
+    }
+
+    /**
+     * dictionaryRemoveWord la ham cho phep nguoi dung xoa mot tu trong tu dien
+     *
+     * @param d           tu dien duoc su dung
+     * @param englishWord tu can xoa
+     */
+
+    public static void dictionaryRemoveWord(Dictionary d, String englishWord) {
+        int i = d.findWord(englishWord);
+        if (i == -1) {
+            // không thể xóa nếu không tìm thấy từ
+            System.out.println("Word <" + englishWord + "> is not in this dictionary, you cannot delete it.");
+        } else {
+            d.removeWord(i);
+            System.out.println("Word <" + englishWord +"> has been removed from dictionary!");
+        }
+    }
+
+    /**
+     * dictionaryChangeWordMeaning la ham cho phep nguoi dung thay doi thong tin
+     * ve mot tu cu the trong tu dien
+     * @param d           tu dien duoc su dung
+     * @param englishWord tu can tim
+     * @param explain     la nghia can thay doi
+     */
+    public static void dictionaryChangeWordMeaning(Dictionary d, String englishWord, String explain) {
+        int i = d.findWord(englishWord);
+        if (i == -1) {
+            System.out.println("Word <"+englishWord+"> is not in this dictionary, you cannot change its meaning.");
+        } else {
+            d.changeMeaning(i, explain);
+            System.out.println("Word <"+englishWord+"> has change its meaning to: "+ explain + ".");
+        }
+    }
+
+    public static void dictionaryAddWord(Dictionary d, String en, String vi) {
+        Word newWord = new Word(en, vi);
+        d.addWord(newWord);
+        System.out.println("Word <" + en +"> has been added to dictionary!");
+    }
+
+    /**
+     * dictionaryExportToFile la ham in ra tu dien hien tai ra file
+     *
+     * @param d tu dien duoc su dung
+     */
+    public static void dictionaryExportToFile(Dictionary d) {
+        PrintWriter outfile = null;
+        try {
+            outfile = new PrintWriter("dictionaryExport.txt");
+            for (int i = 0; i < d.getSize(); i++)
+                outfile.println(d.getWord(i).getWord_target() + "\t" + d.getWord(i).getWord_explain());
+        } catch (FileNotFoundException e) {
+            System.err.println("File doesn't exist");
+            e.printStackTrace();
+        }
+        outfile.close();
+    }
+}
+
+
+public class DictionaryCommandline {
+
+    /**
+     * showAllWord la ham in toan bo cac tu trong tu dien d
+     *
+     * @param d la tu dien duoc in
+     */
+    public static void showAllWord(Dictionary d) {
+        System.out.println("No" + "\t|" + "English" + "\t|" + "Vietnamese");
+        for (int i = 0; i < d.getSize(); i++) {
+            d.printithWord(i); // in tu thu i
+        }
+    }
+
+    /**
+     * dictionaryBasic la ham goi hai ham co ban nhap thong tin tu dien tu commandline
+     * va in ra cac tu trong tu dien
+     *
+     * @param d la tu dien duoc truy cap
+     */
+    public static void dictionaryBasic(Dictionary d) {
+        showAllWord(d); // in toan bo tu dien
+    }
+
+    /**
+     * dictionaryAdvanced la ham goi cac ham nang cao nhap tu file, in ra cac tu
+     * va tim kiem vi tri cua tu
+     *
+     * @param d la tu dien duoc truy cap
+     */
+    public static void dictionaryAdvanced(Dictionary d) {
+        DictionaryManagement.insertFromFile(d);
+        showAllWord(d);
+        DictionaryManagement.dictionaryLookup(d, "chip");
+
+    }
+
+    /**
+     * dictionarySearcher là ham tim cac tu co cung cac chu cai dau tien
+     * va in ra goi y cho nguoi dung
+     *
+     * @param d the dictionary and word the String
+     */
+    public static void dictionarySearcher(Dictionary d, String word) {
+        System.out.println("Finding word begin with <" + word + ">");
+        for (int i = 0; i < d.getSize(); i++) {
+            if (d.getWord(i).getWord_target().contains(word))
+                System.out.println("\tFound: " + d.getWord(i).getWord_target());
+        }
+    }
+
+    public static void main(String args[]) {
+        Dictionary d = new Dictionary(); // khoi tao tu dien
+        //dictionaryBasic(d); // Doc tu commandline va in tu dien
+        //dictionaryAdvanced(d); // Doc tu file, in tu dien va tim kiem tu
+        DictionaryManagement.insertFromFile(d);
+
+        Scanner input = new Scanner(System.in);
+        String choice = "start";
+        while (!choice.equals("exit")) {
+            System.out.println(">>> Enter your choice: (show all word, lookup, search, add, delete, change meaning, export, exit)");
+            choice = input.nextLine();
+            if (choice.equals("show all word")) {
+                showAllWord(d);
+            } else if (choice.equals("lookup")) {
+                System.out.print("Word looking up for: ");
+                String word = input.nextLine();
+                DictionaryManagement.dictionaryLookup(d, word);
+            } else if (choice.equals("search")) {
+                System.out.print("Search for words begin with: ");
+                String word = input.nextLine();
+                dictionarySearcher(d, word);
+            } else if (choice.equals("add")) {
+                System.out.print("english word: ");
+                String en = input.nextLine();
+                System.out.print("word meaning: ");
+                String vi = input.nextLine();
+                DictionaryManagement.dictionaryAddWord(d, en, vi);
+            } else if (choice.equals("delete")) {
+                System.out.print("Delete word: ");
+                String word = input.nextLine();
+                DictionaryManagement.dictionaryRemoveWord(d, word);
+            } else if (choice.equals("change meaning")) {
+                System.out.print("english word: ");
+                String en = input.nextLine();
+                System.out.print("word meaning change to: ");
+                String vi = input.nextLine();
+                DictionaryManagement.dictionaryChangeWordMeaning(d, en, vi);
+            } else if (choice.equals("export")) {
+                DictionaryManagement.dictionaryExportToFile(d);
+            } else {
+                if (!choice.equals("exit")) System.out.println("Choice not found!");
+            }
+        }
+    }
+}
